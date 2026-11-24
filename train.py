@@ -83,6 +83,7 @@ def train(args: argparse.Namespace) -> None:
 
     os.makedirs(args.out_dir, exist_ok=True)
     best_val = float("inf")
+    last_val = float("nan")  # final.pt must not claim the best checkpoint's score
     model.train()
 
     for step in range(args.max_steps):
@@ -119,13 +120,14 @@ def train(args: argparse.Namespace) -> None:
         if args.eval_every and step > 0 and step % args.eval_every == 0:
             val_loss = evaluate(model, val_set, device, amp_dtype, amp_enabled, args.eval_batches)
             marker = ""
+            last_val = val_loss
             if val_loss < best_val:
                 best_val = val_loss
                 marker = " (best)"
-                save_checkpoint(model, cfg, optimizer, step, val_loss, os.path.join(args.out_dir, "best.pt"))
+                save_checkpoint(model, cfg, optimizer, step, val_loss, os.path.join(args.out_dir, "best.pt"), best_val)
             print(f"step {step:5d} | val loss {val_loss:.4f}{marker}")
 
-    save_checkpoint(model, cfg, optimizer, args.max_steps, best_val, os.path.join(args.out_dir, "final.pt"))
+    save_checkpoint(model, cfg, optimizer, args.max_steps, last_val, os.path.join(args.out_dir, "final.pt"), best_val)
     print(f"\nfinal checkpoint written to {os.path.join(args.out_dir, 'final.pt')}")
 
 
@@ -149,8 +151,15 @@ def evaluate(
     return total / batches
 
 
-def save_checkpoint(model, cfg: ModelConfig, optimizer, step: int, val_loss: float, path: str) -> None:
-    """Weights plus the config, so inference cannot drift from training."""
+def save_checkpoint(
+    model, cfg: ModelConfig, optimizer, step: int, val_loss: float, path: str, best_val: float
+) -> None:
+    """Weights plus the config, so inference cannot drift from training.
+
+    ``val_loss`` is the most recent validation measurement at the time of saving
+    (NaN when no evaluation ran); ``best_val`` is the best seen anywhere in the
+    run. They are different numbers whenever a later checkpoint fails to improve.
+    """
     torch.save(
         {
             "model": model.state_dict(),
@@ -158,6 +167,7 @@ def save_checkpoint(model, cfg: ModelConfig, optimizer, step: int, val_loss: flo
             "optimizer": optimizer.state_dict(),
             "step": step,
             "val_loss": val_loss,
+            "best_val": best_val,
         },
         path,
     )

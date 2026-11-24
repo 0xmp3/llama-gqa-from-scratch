@@ -82,14 +82,34 @@ Sample generation after training, prompt in the first line:
 
 ![generation sample](images/generation-sample.png)
 
+## Reproduced
+
+The whole pipeline was re-run from scratch on 25 November 2026, on the same card but under
+Windows 11 with AMD's ROCm 10.2 wheels:
+
+| Stage | Result |
+|---|---|
+| `tokenize_data.py` | 473,992,236 train and 4,765,918 validation tokens in 4 min 51 s |
+| `train.py` | 2,000 steps in 14 min 41 s, 76,400 to 77,000 tok/s, best validation loss 1.7473 at step 1750 |
+| `sample.py` | coherent TinyStories text straight from the final checkpoint |
+
+From that run, same prompt:
+
+> Once upon a time, a girl named Lily found a shiny blue key in her garden. She liked to play
+> with it and pretend she was a princess.
+>
+> Lily's mommy was very happy to see her daughter having fun. They played with the blue key and
+> pretended it was a magic wand.
+
 ## Honest limits
 
 Worth stating plainly, because the numbers above are easy to over-read:
 
 - **This is a reference implementation, not a usable model.** 115M parameters trained on 65.5M
   tokens of a synthetic children's corpus produces TinyStories-grade text and nothing more.
-- **It is not converged.** 2,000 steps is under 14% of a single epoch; validation loss was still
-  falling when it stopped.
+- **It is not converged.** 2,000 steps is under 14% of a single epoch, and the best validation
+  checkpoint in the reproduction run came at step 1750, with nothing after it improving on
+  1.7473.
 - The tokenizer is Hugging Face GPT-2 BPE, not reimplemented. `transformers` is used only to
   tokenise the corpus and decode output.
 - Attention kernels are PyTorch's SDPA, not hand-written CUDA or Triton.
