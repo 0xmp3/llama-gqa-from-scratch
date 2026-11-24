@@ -27,6 +27,12 @@ From the training run whose console output and system monitor are in [`images/`]
 
 System monitor during the run (12 GB of 16 GB, 99% GPU, 294 W): [`images/gpu-utilisation.png`](images/gpu-utilisation.png)
 
+Re-measured on the same card under Windows 11 with AMD's ROCm 10.2 wheels, to check the code is
+not Linux-specific: `train.py` holds **420 ms per step at 78,061 tok/s**, and
+`benchmarks/throughput.py` reports 403 ms and 81,225 tok/s with a **7.8 GB allocator peak**. The
+12 GB in the monitor above is driver-reported usage, which also counts the ROCm context and
+allocator fragmentation, so the two figures measure different things rather than disagreeing.
+
 ## Architecture
 
 | Component | Implementation |
@@ -114,6 +120,9 @@ Measure throughput on other hardware with the same two figures the table quotes:
 ```bash
 python benchmarks/throughput.py --steps 20 --batch-size 32 --grad-accum 4
 ```
+
+CPU works for correctness but not for training: the same code runs at roughly 460 tok/s with
+batch 2 on a Ryzen 5 5600, which is enough to exercise the whole pipeline in seconds.
 
 ## Tests
 
