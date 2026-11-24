@@ -1,0 +1,7 @@
+# Normalise line endings in the repository, not in the checkout, so a Windows
+# clone and a Linux clone produce identical trees.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary

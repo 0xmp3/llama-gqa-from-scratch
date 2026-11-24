@@ -152,6 +152,11 @@ tests/             pytest suite
 Checkpoints carry their own config, so inference reads the architecture from the weights
 instead of keeping a second copy of the hyperparameters in sync by hand.
 
+## Provenance
+
+Built in June 2026 and moved to this account in November 2026, so the commit history here
+starts at the move.
+
 ## References
 
 - LLaMA: [Touvron et al., 2023](https://arxiv.org/abs/2302.13971)
