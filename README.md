@@ -118,7 +118,8 @@ python benchmarks/throughput.py --steps 20 --batch-size 32 --grad-accum 4
 ## Tests
 
 ```bash
-pip install pytest && pytest -q      # 16 tests, CPU only, under a second
+pip install -r requirements-dev.txt     # requirements.txt plus pytest
+pytest -q                               # 16 tests, CPU only, about a second
 ```
 
 The two that matter are in [`tests/test_generate.py`](tests/test_generate.py):
