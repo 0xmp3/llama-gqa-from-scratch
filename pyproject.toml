@@ -1,0 +1,5 @@
+[tool.pytest.ini_options]
+# Make `pytest` work from a clean checkout without installing the package:
+# the tests import llama_gqa from the repo root.
+pythonpath = ["."]
+testpaths = ["tests"]
