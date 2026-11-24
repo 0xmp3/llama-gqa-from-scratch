@@ -62,14 +62,15 @@ The embedding and unembedding are untied, which is where 67% of the parameters s
 | Setting | Value |
 |---|---|
 | Dataset | [`roneneldan/TinyStories`](https://huggingface.co/datasets/roneneldan/TinyStories), GPT-2 BPE |
-| Corpus | 473,992,236 train tokens, 4,705,018 validation tokens |
+| Corpus | 473,992,236 train tokens, 4,765,918 validation tokens |
 | Steps | 2,000, at 32,768 tokens per step = 65,536,000 tokens |
 | Epochs | 13.8% of one pass over the training split |
 | Optimiser | AdamW, lr 6e-4, betas (0.9, 0.95), weight decay 0.1 on 2-D weights only |
 | Schedule | 100-step linear warmup, cosine decay to 10% of peak |
 | Clipping | gradient norm 1.0 |
 
-Corpus preparation (tokenise and pack to `uint16`): [`images/tokenisation-run.png`](images/tokenisation-run.png)
+Corpus preparation (tokenise and pack to `uint16`): [`images/tokenisation-run.png`](images/tokenisation-run.png).
+Re-running `tokenize_data.py` today reproduces both token counts exactly, to the token.
 
 Sample generation after training, prompt in the first line:
 
@@ -113,6 +114,14 @@ works too:
 ```bash
 python train.py --vocab-size 512 --dim 96 --layers 2 --heads 12 --kv-heads 4 \
                 --seq-len 32 --batch-size 2 --grad-accum 2 --max-steps 4
+```
+
+On Windows with an RDNA3 or RDNA4 card, AMD publishes ROCm wheels that run this unchanged (no
+WSL, no Linux), for example for gfx1201:
+
+```bash
+pip install --extra-index-url https://stable.repo.amd.com/rocm/whl-next/ \
+    "torch[device-gfx1201]==2.15.0+rocm10.2.0"
 ```
 
 Measure throughput on other hardware with the same two figures the table quotes:
